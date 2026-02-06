@@ -1,14 +1,26 @@
+import os
 from pathlib import Path
 
+# -----------------------
+# Base Directory
+# -----------------------
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-4&q_706z-m*353fdvsv@v-=@k%q%s5w-#oie71f@9#9aa^6z%m'
+# -----------------------
+# Security
+# -----------------------
+SECRET_KEY = os.environ.get(
+    "SECRET_KEY",
+    "django-insecure-dev-key-change-in-production"
+)
 
-DEBUG = True
+DEBUG = os.environ.get("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ["*"]   # After deploy replace with your render domain
 
-
+# -----------------------
+# Applications
+# -----------------------
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -24,11 +36,14 @@ INSTALLED_APPS = [
 
 AUTH_USER_MODEL = 'accounts.User'
 
-
+# -----------------------
+# Middleware
+# -----------------------
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  # MUST be first
-
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -37,12 +52,14 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-
-# Allow React frontend
+# -----------------------
+# CORS
+# -----------------------
 CORS_ALLOW_ALL_ORIGINS = True
 
-
-# 🔥 THIS BLOCK WAS INCOMPLETE — FIXED HERE
+# -----------------------
+# Django REST Framework
+# -----------------------
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -52,7 +69,9 @@ REST_FRAMEWORK = {
     ),
 }
 
-
+# -----------------------
+# URL / Templates
+# -----------------------
 ROOT_URLCONF = 'backend.urls'
 
 TEMPLATES = [
@@ -72,7 +91,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
-
+# -----------------------
+# Database (SQLite for now)
+# -----------------------
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -80,13 +101,26 @@ DATABASES = {
     }
 }
 
-
+# -----------------------
+# Internationalization
+# -----------------------
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
 USE_TZ = True
 
-STATIC_URL = 'static/'
+# -----------------------
+# Static & Media Files
+# -----------------------
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# -----------------------
+# Default Primary Key
+# -----------------------
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
